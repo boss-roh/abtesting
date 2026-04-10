@@ -13,6 +13,8 @@ interface Experiment {
   variantBLabel: string;
   active: boolean;
   createdAt: string;
+  countA: number;
+  countB: number;
   _count: { assignments: number };
 }
 
@@ -363,7 +365,7 @@ export default function Home() {
                   Allocation
                 </th>
                 <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wider px-5 py-3">
-                  Users
+                  Devices
                 </th>
                 <th className="text-center text-xs font-medium text-gray-500 uppercase tracking-wider px-5 py-3">
                   Status
@@ -398,21 +400,52 @@ export default function Home() {
                     </code>
                   </td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center gap-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                        <span className="text-gray-600">
-                          {exp.variantALabel} {exp.ratioA}%
-                        </span>
-                      </div>
-                      <span className="text-gray-300">/</span>
-                      <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                        <span className="text-gray-600">
-                          {exp.variantBLabel} {100 - exp.ratioA}%
-                        </span>
-                      </div>
-                    </div>
+                    {(() => {
+                      const total = exp.countA + exp.countB;
+                      const actualA = total > 0 ? Math.round((exp.countA / total) * 100) : 0;
+                      const actualB = total > 0 ? 100 - actualA : 0;
+                      return (
+                        <div className="min-w-[220px]">
+                          <div className="flex items-center gap-2 text-xs mb-1.5">
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                              <span className="text-gray-600">
+                                {exp.variantALabel} {exp.ratioA}% target
+                              </span>
+                            </div>
+                            <span className="text-gray-300">/</span>
+                            <div className="flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+                              <span className="text-gray-600">
+                                {exp.variantBLabel} {100 - exp.ratioA}% target
+                              </span>
+                            </div>
+                          </div>
+                          {total > 0 ? (
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                                <div
+                                  className="h-full bg-blue-500 transition-all"
+                                  style={{ width: `${actualA}%` }}
+                                />
+                                <div
+                                  className="h-full bg-orange-500 transition-all"
+                                  style={{ width: `${actualB}%` }}
+                                />
+                              </div>
+                              <span className="text-xs text-gray-500 whitespace-nowrap">
+                                <span className="text-blue-600 font-medium">{actualA}%</span>
+                                {" / "}
+                                <span className="text-orange-600 font-medium">{actualB}%</span>
+                                {" "}actual
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="text-xs text-gray-400">No data yet</div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </td>
                   <td className="px-5 py-4 text-center">
                     <span className="text-sm text-gray-700 font-medium">

@@ -40,6 +40,8 @@ export default function ExperimentDetail({
   const [deviceId, setDeviceId] = useState("");
   const [assignResult, setAssignResult] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [search, setSearch] = useState("");
+  const [variantFilter, setVariantFilter] = useState<"ALL" | "A" | "B">("ALL");
 
   const fetchExperiment = async () => {
     const res = await fetch(`/api/experiments/${id}`);
@@ -116,6 +118,15 @@ export default function ExperimentDetail({
   const total = experiment.assignments.length;
   const pctA = total > 0 ? Math.round((countA / total) * 100) : 0;
   const pctB = total > 0 ? Math.round((countB / total) * 100) : 0;
+
+  const filteredAssignments = experiment.assignments.filter((a) => {
+    const matchesSearch = search
+      ? a.deviceId.toLowerCase().includes(search.toLowerCase())
+      : true;
+    const matchesVariant =
+      variantFilter === "ALL" ? true : a.variant === variantFilter;
+    return matchesSearch && matchesVariant;
+  });
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -385,7 +396,7 @@ export default function ExperimentDetail({
       {/* Assignment Table */}
       <div className="bg-white border border-[#e5e8eb] rounded-xl shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-[#e5e8eb]">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-gray-900">
               Assignment Log
             </h2>
@@ -393,11 +404,58 @@ export default function ExperimentDetail({
               {total.toLocaleString()} total
             </span>
           </div>
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <svg
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full border border-[#e5e8eb] rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="Search by Device ID..."
+              />
+            </div>
+            <div className="flex items-center border border-[#e5e8eb] rounded-lg overflow-hidden">
+              {(["ALL", "A", "B"] as const).map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setVariantFilter(v)}
+                  className={`px-3 py-2 text-xs font-medium transition-colors ${
+                    variantFilter === v
+                      ? "bg-indigo-600 text-white"
+                      : "bg-white text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {v === "ALL"
+                    ? "All"
+                    : v === "A"
+                    ? experiment.variantALabel
+                    : experiment.variantBLabel}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
         {experiment.assignments.length === 0 ? (
           <div className="px-5 py-12 text-center text-sm text-gray-400">
             No assignments yet. Use the test panel above or the API to assign
-            users.
+            devices.
+          </div>
+        ) : filteredAssignments.length === 0 ? (
+          <div className="px-5 py-12 text-center text-sm text-gray-400">
+            No results found.
           </div>
         ) : (
           <table className="w-full">
@@ -415,7 +473,7 @@ export default function ExperimentDetail({
               </tr>
             </thead>
             <tbody className="divide-y divide-[#e5e8eb]">
-              {experiment.assignments.map((a) => (
+              {filteredAssignments.map((a) => (
                 <tr
                   key={a.id}
                   className="hover:bg-[#f9fafb] transition-colors"
@@ -447,6 +505,17 @@ export default function ExperimentDetail({
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="bg-[#f9fafb]">
+                <td
+                  colSpan={3}
+                  className="px-5 py-2.5 text-xs text-gray-400 text-center"
+                >
+                  Showing {filteredAssignments.length} of{" "}
+                  {total.toLocaleString()}
+                </td>
+              </tr>
+            </tfoot>
           </table>
         )}
       </div>
