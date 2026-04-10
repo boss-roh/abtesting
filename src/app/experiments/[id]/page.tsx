@@ -5,7 +5,7 @@ import Link from "next/link";
 
 interface Assignment {
   id: string;
-  userId: string;
+  deviceId: string;
   variant: string;
   assignedAt: string;
 }
@@ -37,7 +37,7 @@ export default function ExperimentDetail({
   const [variantAValue, setVariantAValue] = useState("");
   const [variantBLabel, setVariantBLabel] = useState("");
   const [variantBValue, setVariantBValue] = useState("");
-  const [userId, setUserId] = useState("");
+  const [deviceId, setDeviceId] = useState("");
   const [assignResult, setAssignResult] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -85,18 +85,18 @@ export default function ExperimentDetail({
 
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId.trim()) return;
+    if (!deviceId.trim()) return;
 
     const res = await fetch(`/api/experiments/${id}/assign`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ deviceId }),
     });
     const data = await res.json();
 
     if (res.ok) {
-      setAssignResult(`User "${userId}" → Variant ${data.variant}`);
-      setUserId("");
+      setAssignResult(`Device "${deviceId}" → Variant ${data.variant}`);
+      setDeviceId("");
       fetchExperiment();
     } else {
       setAssignResult(`Error: ${data.error}`);
@@ -183,7 +183,7 @@ export default function ExperimentDetail({
         {/* Progress Bar */}
         <div className="mt-5">
           <div className="flex items-center justify-between text-xs text-gray-500 mb-1.5">
-            <span>Total Exposed Users</span>
+            <span>Total Exposed Devices</span>
             <span className="font-medium text-gray-900">
               {total.toLocaleString()}
             </span>
@@ -238,12 +238,12 @@ export default function ExperimentDetail({
         <div className="bg-[#1e1e2e] rounded-lg px-4 py-3">
           <code className="text-sm text-emerald-400 font-mono">
             <span className="text-purple-400">GET</span>{" "}
-            /api/assign?key={experiment.key}&userId=
-            <span className="text-yellow-300">USER_ID</span>
+            /api/assign?key={experiment.key}&deviceId=
+            <span className="text-yellow-300">DEVICE_ID</span>
           </code>
         </div>
         <p className="text-xs text-gray-400 mt-2">
-          Returns: {`{ variant, label, value }`} — same user always gets same
+          Returns: {`{ variant, label, value }`} — same device always gets same
           variant
         </p>
       </div>
@@ -350,15 +350,15 @@ export default function ExperimentDetail({
             Test Assignment
           </h2>
           <p className="text-xs text-gray-500 mb-3">
-            Enter a User ID to test the assignment logic.
+            Enter a Device ID to test the assignment logic.
           </p>
           <form onSubmit={handleAssign} className="flex gap-2 mb-3">
             <input
               type="text"
-              value={userId}
-              onChange={(e) => setUserId(e.target.value)}
+              value={deviceId}
+              onChange={(e) => setDeviceId(e.target.value)}
               className="flex-1 border border-[#e5e8eb] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="User ID"
+              placeholder="Device ID"
               required
             />
             <button
@@ -404,7 +404,7 @@ export default function ExperimentDetail({
             <thead>
               <tr className="bg-[#f9fafb]">
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-5 py-2.5">
-                  User ID
+                  Device ID
                 </th>
                 <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-5 py-2.5">
                   Variant
@@ -421,7 +421,7 @@ export default function ExperimentDetail({
                   className="hover:bg-[#f9fafb] transition-colors"
                 >
                   <td className="px-5 py-3 text-sm text-gray-700 font-mono">
-                    {a.userId}
+                    {a.deviceId}
                   </td>
                   <td className="px-5 py-3">
                     <span

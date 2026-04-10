@@ -1,6 +1,6 @@
 # A/B Testing Tool
 
-간단한 A/B 테스트 관리 도구. 실험을 생성하고, 트래픽 비율을 설정하면 유저가 자동으로 A/B 변형에 배정됩니다.
+간단한 A/B 테스트 관리 도구. 실험을 생성하고, 트래픽 비율을 설정하면 디바이스(device_id) 기준으로 자동으로 A/B 변형에 배정됩니다.
 
 ## Tech Stack
 
@@ -82,10 +82,10 @@ npm run dev
 
 #### `GET /api/assign`
 
-유저를 실험의 A/B 변형에 자동 배정합니다. 이미 배정된 유저는 동일한 변형을 반환합니다.
+디바이스를 실험의 A/B 변형에 자동 배정합니다. 이미 배정된 디바이스는 동일한 변형을 반환합니다.
 
 ```bash
-curl "https://your-domain/api/assign?key=homepage-cta-test&userId=user-123" \
+curl "https://your-domain/api/assign?key=homepage-cta-test&deviceId=device-abc-123" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -132,10 +132,10 @@ curl "https://your-domain/api/assign?key=homepage-cta-test&userId=user-123" \
 
 #### `POST /api/experiments/:id/assign`
 
-실험 ID 기반으로 유저를 배정합니다.
+실험 ID 기반으로 디바이스를 배정합니다.
 
 ```json
-{ "userId": "user-123" }
+{ "deviceId": "device-abc-123" }
 ```
 
 ### Swagger
@@ -145,9 +145,9 @@ curl "https://your-domain/api/assign?key=homepage-cta-test&userId=user-123" \
 ## 외부 서비스 연동 예시
 
 ```typescript
-// 1. A/B 배정 받기
+// 1. A/B 배정 받기 (device_id 기준)
 const res = await fetch(
-  `https://ab-test.your-domain.com/api/assign?key=homepage-cta-test&userId=${user.id}`,
+  `https://ab-test.your-domain.com/api/assign?key=homepage-cta-test&deviceId=${deviceId}`,
   { headers: { "x-api-key": process.env.AB_TEST_API_KEY } }
 );
 const { variant, label, value } = await res.json();
@@ -157,6 +157,7 @@ amplitude.track("Experiment Exposed", {
   experiment_key: "homepage-cta-test",
   variant,
   variant_label: label,
+  device_id: deviceId,
 });
 
 // 3. UI 분기
@@ -201,9 +202,9 @@ Experiment
 Assignment
 ├── id          (UUID)
 ├── experimentId
-├── userId
+├── deviceId
 ├── variant     ("A" or "B")
 └── assignedAt
 ```
 
-`[experimentId, userId]` 조합은 unique — 같은 유저는 같은 실험에서 항상 같은 변형을 받습니다.
+`[experimentId, deviceId]` 조합은 unique — 같은 디바이스는 같은 실험에서 항상 같은 변형을 받습니다.

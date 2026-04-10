@@ -4,11 +4,11 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const key = searchParams.get("key");
-  const userId = searchParams.get("userId");
+  const deviceId = searchParams.get("deviceId");
 
-  if (!key || !userId) {
+  if (!key || !deviceId) {
     return NextResponse.json(
-      { error: "key and userId are required" },
+      { error: "key and deviceId are required" },
       { status: 400 }
     );
   }
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   // Check for existing assignment
   const existing = await prisma.assignment.findUnique({
     where: {
-      experimentId_userId: { experimentId: experiment.id, userId },
+      experimentId_deviceId: { experimentId: experiment.id, deviceId },
     },
   });
 
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   const variant = Math.random() * 100 < experiment.ratioA ? "A" : "B";
 
   await prisma.assignment.create({
-    data: { experimentId: experiment.id, userId, variant },
+    data: { experimentId: experiment.id, deviceId, variant },
   });
 
   const isA = variant === "A";

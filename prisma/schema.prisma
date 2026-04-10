@@ -26,10 +26,10 @@ model Experiment {
 model Assignment {
   id           String     @id @default(uuid())
   experimentId String
-  userId       String
+  deviceId     String
   variant      String     // "A" or "B"
   assignedAt   DateTime   @default(now())
   experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
 
-  @@unique([experimentId, userId])
+  @@unique([experimentId, deviceId])
 }

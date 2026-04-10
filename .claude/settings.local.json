@@ -6,7 +6,8 @@
       "Bash(docker run:*)",
       "Bash(docker rm:*)",
       "Bash(npm run:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(xargs kill:*)"
     ]
   }
 }

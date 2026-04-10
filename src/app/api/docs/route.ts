@@ -5,7 +5,7 @@ const spec = {
   info: {
     title: "A/B Testing API",
     description:
-      "Simple A/B testing tool API. Create experiments, configure variants, and assign users automatically based on traffic allocation ratios.",
+      "Simple A/B testing tool API. Create experiments, configure variants, and assign devices automatically based on traffic allocation ratios.",
     version: "1.0.0",
   },
   servers: [{ url: "/", description: "Current server" }],
@@ -16,7 +16,7 @@ const spec = {
     },
     {
       name: "Assignment",
-      description: "Assign users to experiment variants",
+      description: "Assign devices to experiment variants",
     },
   ],
   paths: {
@@ -189,9 +189,9 @@ const spec = {
     "/api/experiments/{id}/assign": {
       post: {
         tags: ["Assignment"],
-        summary: "Assign user by experiment ID",
+        summary: "Assign device by experiment ID",
         description:
-          "Assigns a user to variant A or B based on the configured ratio. If the user is already assigned, returns the existing assignment.",
+          "Assigns a device to variant A or B based on the configured ratio. If the device is already assigned, returns the existing assignment.",
         parameters: [
           {
             name: "id",
@@ -207,12 +207,12 @@ const spec = {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["userId"],
+                required: ["deviceId"],
                 properties: {
-                  userId: {
+                  deviceId: {
                     type: "string",
-                    description: "Unique user identifier",
-                    example: "user-12345",
+                    description: "Unique device identifier",
+                    example: "device-abc-123",
                   },
                 },
               },
@@ -237,7 +237,7 @@ const spec = {
             },
           },
           "400": {
-            description: "userId is required or experiment is not active",
+            description: "deviceId is required or experiment is not active",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/Error" },
@@ -258,9 +258,9 @@ const spec = {
     "/api/assign": {
       get: {
         tags: ["Assignment"],
-        summary: "Assign user by experiment key (Public API)",
+        summary: "Assign device by experiment key (Public API)",
         description:
-          "**Primary integration endpoint.** Assigns a user to a variant using the experiment key. Returns the variant assignment along with the configured label and value. If the user is already assigned, returns the existing assignment. Same user always gets the same variant.",
+          "**Primary integration endpoint.** Assigns a device to a variant using the experiment key. Returns the variant assignment along with the configured label and value. If the device is already assigned, returns the existing assignment. Same device always gets the same variant.",
         parameters: [
           {
             name: "key",
@@ -271,12 +271,12 @@ const spec = {
             example: "homepage-cta-test",
           },
           {
-            name: "userId",
+            name: "deviceId",
             in: "query",
             required: true,
             schema: { type: "string" },
-            description: "Unique user identifier",
-            example: "user-12345",
+            description: "Unique device identifier",
+            example: "device-abc-123",
           },
         ],
         responses: {
@@ -373,7 +373,7 @@ const spec = {
         properties: {
           id: { type: "string", format: "uuid" },
           experimentId: { type: "string", format: "uuid" },
-          userId: { type: "string" },
+          deviceId: { type: "string" },
           variant: { type: "string", enum: ["A", "B"] },
           assignedAt: { type: "string", format: "date-time" },
         },

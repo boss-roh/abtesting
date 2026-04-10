@@ -7,10 +7,10 @@ export async function POST(
 ) {
   const { id } = await params;
   const body = await request.json();
-  const { userId } = body;
+  const { deviceId } = body;
 
-  if (!userId) {
-    return NextResponse.json({ error: "userId is required" }, { status: 400 });
+  if (!deviceId) {
+    return NextResponse.json({ error: "deviceId is required" }, { status: 400 });
   }
 
   const experiment = await prisma.experiment.findUnique({ where: { id } });
@@ -25,7 +25,7 @@ export async function POST(
 
   // Check for existing assignment
   const existing = await prisma.assignment.findUnique({
-    where: { experimentId_userId: { experimentId: id, userId } },
+    where: { experimentId_deviceId: { experimentId: id, deviceId } },
   });
 
   if (existing) {
@@ -36,7 +36,7 @@ export async function POST(
   const variant = Math.random() * 100 < experiment.ratioA ? "A" : "B";
 
   const assignment = await prisma.assignment.create({
-    data: { experimentId: id, userId, variant },
+    data: { experimentId: id, deviceId, variant },
   });
 
   return NextResponse.json(assignment, { status: 201 });
